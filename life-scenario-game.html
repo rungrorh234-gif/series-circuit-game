@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TOON LIFE CIRCUIT - เกมวงจรอนุกรมในชีวิตประจำวัน</title>
+<style>
+:root{
+  --ink:#182034;--red:#ef4b43;--yellow:#ffd64a;--blue:#5bb7ef;--green:#73cf87;
+  --cream:#fff8dc;--purple:#8f7bd8;--orange:#ff9c47;--paper:#fffdf5;--line:#191919;
+}
+*{box-sizing:border-box}
+html{touch-action:manipulation}
+body{
+  margin:0;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;color:var(--ink);
+  background:
+    radial-gradient(circle at 15% 10%,rgba(255,255,255,.75) 0 2%,transparent 2.2%),
+    radial-gradient(circle at 78% 18%,rgba(255,255,255,.6) 0 2.4%,transparent 2.6%),
+    linear-gradient(180deg,#77c9f3 0 26%,#d9f2ff 26% 44%,#ffe8a5 44% 100%);
+  min-height:100%;
+}
+button{font:inherit}
+.wrap{max-width:880px;margin:auto;padding:12px}
+.hero{
+  position:relative;overflow:hidden;border:4px solid var(--line);border-radius:24px;
+  background:radial-gradient(circle at 50% 125%,var(--yellow) 0 12%,var(--red) 12% 25%,var(--yellow) 25% 38%,var(--red) 38% 51%,var(--blue) 51% 100%);
+  color:#fff;padding:18px;box-shadow:6px 6px 0 rgba(0,0,0,.22);text-shadow:2px 2px 0 #111;
+}
+.hero h1{margin:0;font-size:clamp(23px,6vw,38px);line-height:1.05;font-weight:1000;letter-spacing:.5px}
+.hero p{margin:8px 0 0;font-size:14px;font-weight:750}
+.hero .zap{position:absolute;right:16px;top:8px;font-size:42px;transform:rotate(12deg)}
+.meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.pill{background:#fff;color:#111;text-shadow:none;border:3px solid #111;border-radius:999px;padding:7px 11px;font-weight:850;box-shadow:2px 2px 0 #111}
+.progress{height:15px;margin-top:12px;border:3px solid #111;border-radius:999px;background:#fff;overflow:hidden}
+.progress>div{height:100%;width:20%;background:linear-gradient(90deg,#62ca7c,#ffd64a,#ff8a43);transition:width .25s}
+.sceneCard{
+  margin-top:12px;border:4px solid #111;border-radius:24px;background:var(--paper);padding:14px;
+  box-shadow:6px 6px 0 rgba(0,0,0,.18);
+}
+.sceneTop{display:grid;grid-template-columns:104px 1fr;gap:14px;align-items:center}
+.art{
+  height:104px;border:3px solid #111;border-radius:20px;background:linear-gradient(#a8ddf7 0 58%,#f5d795 58%);
+  display:grid;place-items:center;font-size:58px;position:relative;overflow:hidden;
+}
+.art:after{content:"";position:absolute;left:5%;right:5%;bottom:14px;border-top:5px dashed rgba(255,255,255,.9)}
+.sceneNo{font-size:13px;font-weight:900;color:#666}
+.sceneTitle{font-size:clamp(19px,4vw,26px);font-weight:1000;margin-top:2px}
+.story{
+  margin-top:12px;border:3px solid #111;border-radius:18px;padding:13px;background:#fff;
+  line-height:1.6;font-size:15px;
+}
+.story:before{content:"สถานการณ์";display:inline-block;margin-right:8px;background:var(--yellow);border:2px solid #111;border-radius:999px;padding:2px 8px;font-weight:900}
+.question{font-size:17px;font-weight:1000;margin:15px 0 9px}
+.choices{display:grid;gap:9px}
+.choice{
+  min-height:56px;width:100%;text-align:left;border:3px solid #111;border-radius:16px;background:#fff;padding:11px 13px;
+  font-weight:750;box-shadow:3px 3px 0 #111;cursor:pointer;transition:.08s;
+}
+.choice:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #111}
+.choice.correct{background:#c9f3a9}
+.choice.wrong{background:#ffc1bb}
+.choice:disabled{color:#111;opacity:1}
+.feedback{margin-top:12px;border:3px solid #111;border-radius:16px;padding:12px;background:#fff2b7;line-height:1.55}
+.feedback.good{background:#d9f7c7}
+.hidden{display:none!important}
+.nextRow{display:flex;justify-content:flex-end;margin-top:12px}
+.next{
+  min-height:48px;border:3px solid #111;border-radius:14px;background:var(--blue);padding:9px 16px;font-weight:1000;
+  box-shadow:3px 3px 0 #111;cursor:pointer
+}
+.next:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #111}
+.result{
+  margin-top:12px;border:4px solid #111;border-radius:24px;background:var(--cream);padding:16px;box-shadow:6px 6px 0 rgba(0,0,0,.18);text-align:center
+}
+.trophy{font-size:62px}
+.result h2{font-size:27px;margin:4px 0}
+.scoreBig{font-size:22px;font-weight:1000}
+.lessons{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px;text-align:left}
+.lesson{border:3px solid #111;border-radius:16px;padding:11px;background:#fff}
+.lesson b{display:block;margin-bottom:4px}
+.actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.actions button,.actions a{
+  min-height:46px;border:3px solid #111;border-radius:14px;padding:9px 14px;background:var(--yellow);color:#111;text-decoration:none;font-weight:1000;box-shadow:3px 3px 0 #111
+}
+.tip{
+  margin-top:12px;border:3px dashed #111;border-radius:16px;background:#fff;padding:11px;font-size:13px;line-height:1.5
+}
+@media(max-width:560px){
+  .sceneTop{grid-template-columns:78px 1fr}.art{height:78px;font-size:43px}.lessons{grid-template-columns:1fr}
+  .hero .zap{font-size:34px}.story{font-size:14px}.choice{font-size:14px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div class="zap">⚡</div>
+    <h1>TOON LIFE CIRCUIT!</h1>
+    <p>ภารกิจการ์ตูน • ใช้ความรู้เรื่องวงจรอนุกรมแก้ปัญหาในชีวิตประจำวัน</p>
+    <div class="meta">
+      <span class="pill">⭐ คะแนน <b id="score">0</b>/5</span>
+      <span class="pill">🎯 ภารกิจ <b id="step">1</b>/5</span>
+    </div>
+    <div class="progress"><div id="bar"></div></div>
+  </section>
+
+  <section id="play" class="sceneCard">
+    <div class="sceneTop">
+      <div id="art" class="art" aria-hidden="true">🔦</div>
+      <div>
+        <div id="sceneNo" class="sceneNo">สถานการณ์ที่ 1</div>
+        <div id="sceneTitle" class="sceneTitle">ไฟฉายก่อนออกค่าย</div>
+      </div>
+    </div>
+
+    <div id="story" class="story"></div>
+    <div id="question" class="question"></div>
+    <div id="choices" class="choices"></div>
+    <div id="feedback" class="feedback hidden" aria-live="polite"></div>
+    <div class="nextRow"><button id="next" class="next hidden" type="button">ภารกิจต่อไป →</button></div>
+  </section>
+
+  <section id="finish" class="result hidden">
+    <div class="trophy">🏆</div>
+    <h2>ภารกิจสำเร็จ!</h2>
+    <div id="finalScore" class="scoreBig"></div>
+    <p>นักเรียนได้นำความรู้เรื่องวงจรอนุกรมไปใช้ตัดสินใจในสถานการณ์ใกล้ตัวแล้ว</p>
+
+    <div class="lessons">
+      <div class="lesson"><b>🔦 ไฟฉาย</b>ใช้จำนวนและชนิดของเซลล์ไฟฟ้าตามที่อุปกรณ์กำหนด และต่อขั้วให้ถูกทิศทาง</div>
+      <div class="lesson"><b>📺 รีโมต</b>ถ้าเซลล์ไฟฟ้าก้อนหนึ่งใส่กลับขั้ว อุปกรณ์อาจไม่ทำงานตามปกติ</div>
+      <div class="lesson"><b>🎄 ไฟประดับ</b>ในวงจรอนุกรม ถ้าวงจรขาด กระแสไฟฟ้าจะไหลไม่ครบเส้นทาง</div>
+      <div class="lesson"><b>🔘 สวิตช์</b>สวิตช์ช่วยทำให้วงจรเปิดหรือปิด จึงควบคุมการไหลของกระแสไฟฟ้าได้</div>
+    </div>
+
+    <div class="tip"><b>จำไว้:</b> การเพิ่มเซลล์ไฟฟ้าไม่ได้แปลว่าควรเพิ่มให้มากที่สุดเสมอ ในการใช้งานจริงควรใช้จำนวนและชนิดตามที่อุปกรณ์กำหนด</div>
+    <div class="actions">
+      <button id="restart" type="button">🔁 เล่นอีกครั้ง</button>
+      <a href="./">⚡ กลับห้องทดลอง</a>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const questions = [
+    {
+      icon:'🔦',
+      title:'ไฟฉายก่อนออกค่าย',
+      story:'ก่อนออกค่าย เมย์หยิบไฟฉายที่ระบุว่าใช้ถ่าน AA 2 ก้อน แต่ในช่องใส่ถ่านมีอยู่เพียง 1 ก้อน ไฟฉายจึงใช้งานไม่ได้ตามปกติ',
+      q:'เมย์ควรทำอย่างไร?',
+      choices:[
+        'ใส่ถ่าน AA ให้ครบ 2 ก้อนตามที่ไฟฉายกำหนด และจัดขั้ว + / − ให้ถูกต้อง',
+        'ใส่ถ่านเพิ่มให้มากที่สุดเท่าที่หาได้',
+        'ถอดสวิตช์ออกเพื่อให้ไฟไหลสะดวกขึ้น'
+      ],
+      ans:0,
+      exp:'ไฟฉายควรใช้จำนวนและชนิดของเซลล์ไฟฟ้าตามที่กำหนด การต่อเซลล์ในทิศทางที่ถูกต้องช่วยให้อุปกรณ์ได้รับแรงดันตามที่ออกแบบไว้'
+    },
+    {
+      icon:'📺',
+      title:'รีโมตทีวีไม่ทำงาน',
+      story:'นนท์เปลี่ยนถ่านรีโมตทีวี 2 ก้อนใหม่ แต่รีโมตยังไม่ทำงาน เมื่อเปิดฝาดูพบว่าถ่านก้อนหนึ่งใส่กลับด้านจากเครื่องหมาย + และ − ในช่องใส่ถ่าน',
+      q:'วิธีแก้ที่เหมาะสมคือข้อใด?',
+      choices:[
+        'จัดถ่านทั้งสองก้อนให้ขั้ว + และ − ตรงตามเครื่องหมายในช่องใส่ถ่าน',
+        'เพิ่มถ่านก้อนที่ 3 วางทับลงไป',
+        'เขย่ารีโมตแรง ๆ เพื่อให้กระแสไฟเดิน'
+      ],
+      ans:0,
+      exp:'การต่อเซลล์ไฟฟ้าต้องคำนึงถึงทิศทางของขั้ว หากใส่กลับขั้ว วงจรของอุปกรณ์อาจไม่ทำงานตามที่ออกแบบไว้'
+    },
+    {
+      icon:'🎄',
+      title:'ไฟประดับดับทั้งเส้น',
+      story:'ไฟประดับชุดหนึ่งต่อหลอดแบบอนุกรม เมื่อหลอดดวงหนึ่งถูกถอดออก หลอดที่เหลือก็ดับทั้งหมด',
+      q:'เหตุใดหลอดที่เหลือจึงดับ?',
+      choices:[
+        'การถอดหลอดทำให้วงจรเปิด กระแสไฟฟ้าไหลไม่ครบเส้นทาง',
+        'หลอดที่เหลือได้รับไฟมากเกินไปพร้อมกัน',
+        'สวิตช์เพิ่มจำนวนขึ้นเอง'
+      ],
+      ans:0,
+      exp:'วงจรอนุกรมมีเส้นทางกระแสไฟฟ้าเพียงทางเดียว หากวงจรขาด กระแสจะไหลไม่ครบเส้นทางและหลอดที่เหลือจึงดับ'
+    },
+    {
+      icon:'🎮',
+      title:'ของเล่นแข่งรถใช้ถ่าน 2 ก้อน',
+      story:'ของเล่นแข่งรถระบุให้ใช้ถ่าน AA 2 ก้อน เพื่อนบอกว่า “ถ้าใส่ 3 ก้อน รถน่าจะวิ่งแรงกว่าเดิม”',
+      q:'นักเรียนควรตัดสินใจอย่างไร?',
+      choices:[
+        'ใช้ถ่าน 2 ก้อนตามที่ผู้ผลิตกำหนด',
+        'เพิ่มเป็น 3 ก้อนเสมอ เพราะแรงดันมากยิ่งดี',
+        'ใช้ถ่านคนละชนิดผสมกันเพื่อให้แรงขึ้น'
+      ],
+      ans:0,
+      exp:'แม้เซลล์ไฟฟ้าที่ต่ออนุกรมจะทำให้แรงดันรวมเพิ่มขึ้น แต่ในการใช้งานจริงต้องใช้จำนวนและชนิดตามที่อุปกรณ์กำหนด เพื่อไม่ให้อุปกรณ์ได้รับแรงดันไม่เหมาะสม'
+    },
+    {
+      icon:'🔘',
+      title:'โมเดลไฟหน้าบ้าน',
+      story:'นักเรียนทำโมเดลหลอดไฟหน้าบ้าน เมื่อตัวสวิตช์อยู่ในตำแหน่งเปิด หลอดไม่สว่าง แต่เมื่อกดให้สวิตช์ปิด หลอดกลับสว่าง',
+      q:'ข้อใดอธิบายได้ถูกต้อง?',
+      choices:[
+        'เมื่อสวิตช์ปิด วงจรครบ กระแสไฟฟ้าจึงไหลได้',
+        'เมื่อสวิตช์ปิด จำนวนแบตเตอรี่จะเพิ่มขึ้นเอง',
+        'เมื่อสวิตช์เปิด หลอดไฟได้รับพลังงานมากกว่า'
+      ],
+      ans:0,
+      exp:'สวิตช์ใช้ควบคุมการเปิด–ปิดวงจร เมื่อวงจรปิด กระแสไฟฟ้าไหลได้ครบเส้นทางและหลอดไฟจึงสว่าง'
+    }
+  ];
+
+  const $ = s => document.querySelector(s);
+  let i=0, score=0, answered=false;
+
+  function render(){
+    answered=false;
+    const x=questions[i];
+    $('#score').textContent=score;
+    $('#step').textContent=i+1;
+    $('#bar').style.width=((i+1)/questions.length*100)+'%';
+    $('#art').textContent=x.icon;
+    $('#sceneNo').textContent='สถานการณ์ที่ '+(i+1);
+    $('#sceneTitle').textContent=x.title;
+    $('#story').textContent=x.story;
+    $('#question').textContent=x.q;
+    $('#feedback').className='feedback hidden';
+    $('#next').classList.add('hidden');
+    $('#choices').innerHTML='';
+
+    x.choices.forEach((text,j)=>{
+      const b=document.createElement('button');
+      b.type='button';
+      b.className='choice';
+      b.textContent=(j+1)+'. '+text;
+      b.addEventListener('click',()=>answer(j,b));
+      $('#choices').appendChild(b);
+    });
+  }
+
+  function answer(j,b){
+    if(answered)return;
+    answered=true;
+    const x=questions[i];
+    const all=[...document.querySelectorAll('.choice')];
+    all.forEach(el=>el.disabled=true);
+
+    if(j===x.ans){
+      score++;
+      b.classList.add('correct');
+      $('#feedback').className='feedback good';
+      $('#feedback').innerHTML='<b>✅ เยี่ยมมาก! ตัดสินใจถูกต้อง</b><br>'+x.exp;
+    }else{
+      b.classList.add('wrong');
+      all[x.ans].classList.add('correct');
+      $('#feedback').className='feedback';
+      $('#feedback').innerHTML='<b>💡 ลองดูหลักการอีกครั้ง</b><br>'+x.exp;
+    }
+    $('#score').textContent=score;
+    $('#next').classList.remove('hidden');
+    $('#next').textContent=i===questions.length-1?'ดูผลภารกิจ →':'ภารกิจต่อไป →';
+  }
+
+  $('#next').addEventListener('click',()=>{
+    if(i<questions.length-1){i++;render();}
+    else finish();
+  });
+
+  function finish(){
+    $('#play').classList.add('hidden');
+    $('#finish').classList.remove('hidden');
+    $('#bar').style.width='100%';
+    let msg='ได้ '+score+'/5 คะแนน';
+    if(score===5) msg+=' • สุดยอดนักสืบวงจร!';
+    else if(score>=3) msg+=' • ทำได้ดีมาก!';
+    else msg+=' • ลองเล่นอีกครั้งเพื่อทบทวน';
+    $('#finalScore').textContent=msg;
+  }
+
+  $('#restart').addEventListener('click',()=>{
+    i=0;score=0;
+    $('#finish').classList.add('hidden');
+    $('#play').classList.remove('hidden');
+    render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
