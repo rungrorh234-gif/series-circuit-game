@@ -478,15 +478,36 @@ header p{color:#fff;font-weight:750}
       });
     }
 
-    graph(includeBulb=true){
+    graph(includeBulb=true,excludeBatteryId=null){
       const g={};
       const edge=(a,b)=>{(g[a]??=[]).push(b);(g[b]??=[]).push(a)};
       this.state.wires.forEach(w=>edge(w.a,w.b));
       this.state.components.forEach(c=>{
         if(c.type==='switch'&&c.closed)edge(this.tid(c.id,'left'),this.tid(c.id,'right'));
         if(c.type==='bulb'&&includeBulb)edge(this.tid(c.id,'left'),this.tid(c.id,'right'));
+
+        // เมื่อตรวจวงจรที่มีหลายเซลล์ ให้เซลล์อื่น ๆ เป็นส่วนหนึ่งของเส้นทางไฟฟ้า
+        // แต่เว้นเซลล์ต้นทางที่กำลังตรวจ เพื่อไม่ให้เกิดวงจรลัดภายในตัวเอง
+        if(c.type==='battery'&&c.id!==excludeBatteryId){
+          edge(this.tid(c.id,'minus'),this.tid(c.id,'plus'));
+        }
       });
       return g;
+    }
+
+    validBatteryLinks(){
+      const batteries=new Set(this.state.components.filter(c=>c.type==='battery').map(c=>c.id));
+      const terminalInfo=tid=>{
+        const [id,side]=tid.split(':');
+        return batteries.has(id)?{id,side}:null;
+      };
+      for(const w of this.state.wires){
+        const a=terminalInfo(w.a),b=terminalInfo(w.b);
+        if(a&&b&&a.id!==b.id&&a.side===b.side){
+          return false;
+        }
+      }
+      return true;
     }
 
     reachable(g,start){
@@ -500,8 +521,12 @@ header p{color:#fff;font-weight:750}
 
     complete(){
       if(!this.state.components.some(c=>c.type==='switch'&&c.closed))return false;
-      const g=this.graph(true);
+      if(!this.validBatteryLinks())return false;
+
+      // ตรวจทีละเซลล์ว่า ขั้ว + และ - ของเซลล์นั้นเชื่อมถึงกัน
+      // ผ่านวงจรภายนอก โดยสามารถผ่านเซลล์อื่นที่ต่ออนุกรมกันได้
       for(const b of this.state.components.filter(c=>c.type==='battery')){
+        const g=this.graph(true,b.id);
         if(this.reachable(g,this.tid(b.id,'plus')).has(this.tid(b.id,'minus')))return true;
       }
       return false;
@@ -509,9 +534,13 @@ header p{color:#fff;font-weight:750}
 
     bulbLit(c){
       if(!this.state.components.some(x=>x.type==='switch'&&x.closed))return false;
-      const g=this.graph(false);
+      if(!this.validBatteryLinks())return false;
+
       const L=this.tid(c.id,'left'),R=this.tid(c.id,'right');
       for(const b of this.state.components.filter(x=>x.type==='battery')){
+        // ไม่เชื่อมภายในหลอดที่กำลังตรวจ และเว้นเซลล์ต้นทาง
+        // แต่ยอมให้กระแสผ่านเซลล์อื่น ๆ ที่ต่ออนุกรมอยู่ในเส้นทาง
+        const g=this.graph(false,b.id);
         const p=this.reachable(g,this.tid(b.id,'plus'));
         const m=this.reachable(g,this.tid(b.id,'minus'));
         if((p.has(L)&&m.has(R))||(p.has(R)&&m.has(L)))return true;
