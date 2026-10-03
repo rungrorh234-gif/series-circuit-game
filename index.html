@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ห้องทดลองวงจรไฟฟ้าอนุกรม - มือถือ</title>
+<title>TOON CIRCUIT LAB - ห้องทดลองวงจรไฟฟ้า</title>
 <style>
 :root{--ink:#14324a;--muted:#63788b;--line:#d6e2eb;--panel:#fff;--blue:#2d74b8;--blue2:#eaf4fd;--red:#d8453d;--black:#23272d;--green:#2f9e63}
 *{box-sizing:border-box}
@@ -65,23 +65,168 @@ svg.wires{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-eve
 path.wire{fill:none;stroke-width:6;stroke-linecap:round}
 path.wire.redWire{stroke:var(--red)} path.wire.blackWire{stroke:var(--black)}
 @media(min-width:760px){.stage{min-height:500px}.stats{grid-template-columns:repeat(4,1fr)}}
+
+/* ===== Classic cartoon theme ===== */
+:root{--toon-red:#e33b2e;--toon-yellow:#ffd43b;--toon-blue:#4aa8e8;--toon-cream:#fff4c7;--toon-ink:#161616}
+body{
+  background:
+    radial-gradient(circle at 20% 10%,rgba(255,255,255,.55) 0 3%,transparent 3.2%),
+    linear-gradient(180deg,#5eb7ef 0 28%,#bfe8ff 28% 46%,#f4d17d 46% 100%);
+  color:var(--toon-ink);
+}
+header{
+  position:sticky;overflow:hidden;
+  background:
+    radial-gradient(circle at 50% 115%,#ffd43b 0 11%,#e33b2e 11% 22%,#ffd43b 22% 33%,#e33b2e 33% 45%,#5aaee8 45% 100%);
+  color:#fff;
+  border-bottom:4px solid #151515;
+  text-shadow:2px 2px 0 #111;
+}
+header:after{
+  content:"";
+  position:absolute;inset:auto 10px 5px auto;
+  width:64px;height:34px;border-radius:50%;
+  background:#fff;opacity:.2;transform:rotate(-8deg);
+}
+header h1{font-weight:1000;letter-spacing:.8px;font-size:22px}
+header p{color:#fff;font-weight:750}
+.note{
+  background:var(--toon-cream);
+  border:3px solid var(--toon-ink);
+  box-shadow:5px 5px 0 rgba(0,0,0,.22);
+}
+.tabs button{
+  border:3px solid var(--toon-ink);
+  box-shadow:3px 3px 0 #111;
+  background:#fff7d4;
+}
+.tabs button:nth-child(1){background:#ffd84a}
+.tabs button:nth-child(2){background:#63b8ee}
+.tabs button:nth-child(3){background:#f06b5f}
+.tabs button.active{
+  background:#fff;
+  transform:translateY(-2px);
+  box-shadow:4px 5px 0 #111;
+}
+.board{
+  border:3px solid var(--toon-ink);
+  box-shadow:6px 6px 0 rgba(0,0,0,.18);
+  background:#fffdf2;
+}
+.board h2{
+  display:inline-block;
+  background:#ffd43b;
+  border:3px solid #111;
+  border-radius:999px;
+  padding:4px 12px;
+  transform:rotate(-1deg);
+}
+.tools button,.modes button,.reset{
+  border:3px solid #111;
+  box-shadow:3px 3px 0 #111;
+  transition:transform .08s,box-shadow .08s;
+}
+.tools button:active,.modes button:active,.reset:active{
+  transform:translate(2px,2px);
+  box-shadow:1px 1px 0 #111;
+}
+.tools button:nth-child(1){background:#ffdd49;color:#111}
+.tools button:nth-child(2){background:#61b8ef;color:#111}
+.tools button:nth-child(3){background:#ef6a5d;color:#111}
+.modes button{background:#fffdf5}
+.modes button.active{outline:4px solid #ffd43b}
+.trash{
+  border:3px dashed #111;
+  background:#fff0e2;
+  color:#111;
+}
+.stage{
+  border:4px solid #111;
+  background:
+    radial-gradient(ellipse at 15% 82%,#c58b46 0 3%,transparent 3.5%),
+    radial-gradient(ellipse at 82% 78%,#bd8240 0 2.5%,transparent 3%),
+    linear-gradient(180deg,#8ed2f4 0 43%,#f3d087 43% 100%);
+  box-shadow:inset 0 0 0 3px rgba(255,255,255,.7);
+}
+.stage:after{
+  content:"";
+  position:absolute;left:8%;right:8%;bottom:34px;height:8px;
+  background:repeating-linear-gradient(90deg,#fff 0 28px,transparent 28px 54px);
+  opacity:.8;pointer-events:none;
+}
+.stage .hint{
+  display:inline-block;
+  left:50%;right:auto;transform:translateX(-50%);
+  width:max-content;max-width:90%;
+  padding:6px 10px;
+  background:#fff;
+  border:2px solid #111;
+  border-radius:999px;
+  color:#111;
+  font-weight:800;
+}
+.label{
+  border:2px solid #111;
+  box-shadow:2px 2px 0 #111;
+  font-weight:800;
+}
+.removeBtn{
+  border:2px solid #111;
+  box-shadow:2px 2px 0 #111;
+  background:#ff6f62;color:#111;
+}
+.terminal{
+  box-shadow:0 0 0 3px #111;
+}
+.terminal.selected{
+  box-shadow:0 0 0 4px #fff,0 0 0 8px #ffd43b;
+}
+.battery,.switchbox,.glass,.base{filter:saturate(1.15)}
+.pill{
+  border:2px solid #111;
+  background:#fff8d6;
+  box-shadow:2px 2px 0 #111;
+  font-weight:750;
+}
+.bar{border:3px solid #111;background:#fff}
+.fill{background:linear-gradient(90deg,#ffe56e,#ffb521,#ff6a2a)}
+.status{
+  border:3px solid #111;
+  background:#fff0b8;
+  box-shadow:3px 3px 0 #111;
+}
+.status.ok{
+  background:#c9f59b;
+  animation:toonPop .25s ease-out;
+}
+@keyframes toonPop{
+  0%{transform:scale(.96) rotate(-1deg)}
+  70%{transform:scale(1.02) rotate(.5deg)}
+  100%{transform:scale(1)}
+}
+@media(max-width:480px){
+  header h1{font-size:20px}
+  .stage{min-height:440px}
+  .stage .hint{font-size:11px}
+}
+
 </style>
 </head>
 <body>
 <header>
-  <h1>⚡ ห้องทดลองวงจรไฟฟ้าอนุกรม</h1>
-  <p>เวอร์ชันมือถือ: แตะจุดต่อสาย 2 จุดเพื่อเชื่อมสาย ไม่ต้องลากสาย</p>
+  <h1>⚡ TOON CIRCUIT LAB</h1>
+  <p>ห้องทดลองวงจรไฟฟ้าในโลกการ์ตูน • แตะ 2 จุดเพื่อเชื่อมสาย</p>
 </header>
 <main>
   <div class="note">
-    <b>วิธีเล่นบนโทรศัพท์:</b> เลือกวงจร A/B/C → เพิ่มอุปกรณ์ → เลือกสายแดงหรือดำ → <b>แตะจุดต่อสายจุดแรก แล้วแตะจุดที่สอง</b> ระบบจะเชื่อมสายให้ทันที
+    <b>ภารกิจ TOON LAB:</b> เลือกด่าน A/B/C → หยิบอุปกรณ์ → เลือกสายแดงหรือดำ → <b>แตะจุดต่อสายจุดแรก แล้วแตะจุดที่สอง</b> เพื่อเชื่อมวงจร
     แตะตัวสวิตช์เพื่อเปิด/ปิด และกด × ข้างอุปกรณ์เพื่อลบได้
   </div>
 
   <div class="tabs">
-    <button data-tab="A" class="active">วงจร A<br>1 ก้อน</button>
-    <button data-tab="B">วงจร B<br>2 ก้อน</button>
-    <button data-tab="C">วงจร C<br>3 ก้อน</button>
+    <button data-tab="A" class="active">ด่าน A<br>1 ก้อน</button>
+    <button data-tab="B">ด่าน B<br>2 ก้อน</button>
+    <button data-tab="C">ด่าน C<br>3 ก้อน</button>
   </div>
 
   <div id="boards"></div>
@@ -100,8 +245,8 @@ path.wire.redWire{stroke:var(--red)} path.wire.blackWire{stroke:var(--black)}
   function boardTemplate(def){
     return `
     <section class="board ${def.id==='A'?'active':''}" data-board="${def.id}">
-      <h2>วงจร ${def.id}</h2>
-      <div class="sub">ให้นักเรียนต่อเองทั้งหมด • เป้าหมายแบตเตอรี่ ${def.target} ก้อน</div>
+      <h2>ด่าน ${def.id}</h2>
+      <div class="sub">ภารกิจ: ต่อวงจรเองทั้งหมด • ใช้แบตเตอรี่ ${def.target} ก้อน</div>
       <div class="tools">
         <button data-add="battery">+ แบตเตอรี่</button>
         <button data-add="bulb">+ หลอดไฟ</button>
@@ -116,7 +261,7 @@ path.wire.redWire{stroke:var(--red)} path.wire.blackWire{stroke:var(--black)}
       <div class="trash">🗑️ ใช้ปุ่ม × บนอุปกรณ์เพื่อลบ (เหมาะกับมือถือที่สุด)</div>
       <div class="stage">
         <svg class="wires"></svg>
-        <div class="hint">แตะจุดต่อสาย 2 จุดเพื่อเชื่อม • แตะสวิตช์เพื่อเปิด/ปิด</div>
+        <div class="hint">⚡ แตะจุดต่อสาย 2 จุดเพื่อเชื่อม • แตะสวิตช์เพื่อเปิด/ปิด</div>
       </div>
       <div class="stats">
         <div class="pill">แบตเตอรี่ <b class="bc">0</b></div>
@@ -412,7 +557,7 @@ path.wire.redWire{stroke:var(--red)} path.wire.blackWire{stroke:var(--black)}
       if(br>0&&lit>0){
         status.classList.add('ok');
         const level=br>=85?'สว่างมาก':br>=50?'สว่างปานกลาง':'สว่างน้อย';
-        status.querySelector('b').textContent='✅ วงจรทำงานแล้ว';
+        status.querySelector('b').textContent='⚡ ZAP! วงจรทำงานแล้ว';
         st.textContent=`ระดับความสว่าง: ${level} (${br}%)`;
       }else{
         status.classList.remove('ok');
