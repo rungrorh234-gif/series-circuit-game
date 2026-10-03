@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ห้องทดลองวงจรไฟฟ้าอนุกรม - มือถือ</title>
+<style>
+:root{--ink:#14324a;--muted:#63788b;--line:#d6e2eb;--panel:#fff;--blue:#2d74b8;--blue2:#eaf4fd;--red:#d8453d;--black:#23272d;--green:#2f9e63}
+*{box-sizing:border-box}
+html{touch-action:manipulation}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;background:#edf4f9;color:var(--ink)}
+header{background:#123b60;color:#fff;padding:14px 16px;position:sticky;top:0;z-index:30}
+header h1{margin:0;font-size:19px}
+header p{margin:4px 0 0;font-size:13px;color:#dce9f4}
+main{max-width:900px;margin:auto;padding:10px}
+.note{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;font-size:14px;line-height:1.5}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.tabs button{min-height:46px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font-weight:800}
+.tabs button.active{background:#dceefe;border-color:#7faed7}
+.board{display:none;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px}
+.board.active{display:block}
+.board h2{margin:0 0 4px;font-size:18px}
+.sub{font-size:13px;color:var(--muted);margin-bottom:10px}
+.tools{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.tools button,.modes button,.reset{min-height:48px;border:1px solid var(--line);border-radius:12px;font-weight:800;font-size:15px}
+.tools button{background:var(--blue2);color:#205b8e}
+.modes{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px}
+.modes button{background:#fff}
+.modes button.active{outline:3px solid #a7c9e7}
+.red{color:#b62c25}.black{color:#111}
+.deleteMode{color:#a63531}
+.reset{width:100%;background:#f5f8fb;color:#234d6f;margin-bottom:8px}
+.trash{border:2px dashed #d7bcbc;background:#fff6f6;color:#94403d;border-radius:14px;text-align:center;padding:11px;font-weight:700;margin-bottom:8px}
+.stage{position:relative;min-height:430px;border:2px dashed #aac0cf;border-radius:16px;overflow:hidden;background:
+linear-gradient(rgba(255,255,255,.88),rgba(255,255,255,.88)),
+repeating-linear-gradient(0deg,#d8e2e9 0 1px,transparent 1px 28px),
+repeating-linear-gradient(90deg,#d8e2e9 0 1px,transparent 1px 28px)}
+.stage .hint{position:absolute;top:8px;left:8px;right:8px;text-align:center;font-size:12px;color:#6a8193;pointer-events:none}
+svg.wires{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+.component{position:absolute;transform:translate(-50%,-50%);z-index:3;text-align:center;touch-action:none}
+.label{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:8px;padding:4px 7px;font-size:12px;margin-top:5px}
+.removeBtn{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;border:0;background:#fff0f0;color:#a9312c;font-weight:900;margin-left:4px}
+.terminal{position:absolute;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:900;border:3px solid #fff;box-shadow:0 0 0 2px #566b7a;z-index:6;touch-action:manipulation}
+.terminal.selected{box-shadow:0 0 0 5px #7bb7e9}
+.plus{background:var(--red)}.minus{background:var(--black)}.nodeR{background:var(--red)}.nodeB{background:var(--black)}
+.battery{position:relative;width:112px;height:44px;border:2px solid #222;border-radius:8px;background:linear-gradient(90deg,#202020 0 12%,#b87333 12% 82%,#202020 82%)}
+.battery .minus{left:-22px;top:50%;transform:translateY(-50%)}
+.battery .plus{right:-22px;top:50%;transform:translateY(-50%)}
+.bulb{position:relative;width:88px;height:112px}
+.glass{position:absolute;left:16px;top:0;width:56px;height:56px;border-radius:50%;border:3px solid #888;background:radial-gradient(circle,#fff,#ddd);transition:.2s}
+.glass.on{border-color:#dfaa00;background:radial-gradient(circle,#fffef0 0,#ffe27a 36%,#ffc72c 62%,#eea300 100%);box-shadow:0 0 var(--glow,20px) rgba(255,190,0,.88)}
+.base{position:absolute;left:30px;bottom:22px;width:28px;height:34px;border:2px solid #555;border-radius:4px;background:repeating-linear-gradient(#777 0 3px,#aaa 3px 6px)}
+.bulb .nodeB{left:4px;bottom:13px}.bulb .nodeR{right:4px;bottom:13px}
+.switchbox{position:relative;width:108px;height:50px;border:2px solid #555;border-radius:10px;background:#ddd}
+.switchbox.closed{background:#d9f1df;border-color:#43885c}
+.switchbox:after{content:"";position:absolute;left:19px;top:24px;width:55px;height:5px;border-radius:4px;background:#333;transform:rotate(-20deg);transform-origin:left center;transition:.18s}
+.switchbox.closed:after{transform:rotate(0)}
+.switchbox .nodeB{left:-16px;top:50%;transform:translateY(-50%)}.switchbox .nodeR{right:-16px;top:50%;transform:translateY(-50%)}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:8px}
+.pill{border:1px solid var(--line);border-radius:999px;background:#fff;padding:8px;text-align:center;font-size:13px}
+.bar{height:22px;background:#fff;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin-top:8px}
+.fill{height:100%;width:0;background:linear-gradient(90deg,#f7e69a,#ffcd3c,#f2a000);transition:.2s}
+.status{margin-top:8px;border:1px solid #efd985;background:#fff8df;border-radius:12px;padding:10px;font-size:13px;line-height:1.45}
+.status.ok{background:#ecf8f0;border-color:#b8dfc7}
+path.wire{fill:none;stroke-width:6;stroke-linecap:round}
+path.wire.redWire{stroke:var(--red)} path.wire.blackWire{stroke:var(--black)}
+@media(min-width:760px){.stage{min-height:500px}.stats{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<header>
+  <h1>⚡ ห้องทดลองวงจรไฟฟ้าอนุกรม</h1>
+  <p>เวอร์ชันมือถือ: แตะจุดต่อสาย 2 จุดเพื่อเชื่อมสาย ไม่ต้องลากสาย</p>
+</header>
+<main>
+  <div class="note">
+    <b>วิธีเล่นบนโทรศัพท์:</b> เลือกวงจร A/B/C → เพิ่มอุปกรณ์ → เลือกสายแดงหรือดำ → <b>แตะจุดต่อสายจุดแรก แล้วแตะจุดที่สอง</b> ระบบจะเชื่อมสายให้ทันที
+    แตะตัวสวิตช์เพื่อเปิด/ปิด และกด × ข้างอุปกรณ์เพื่อลบได้
+  </div>
+
+  <div class="tabs">
+    <button data-tab="A" class="active">วงจร A<br>1 ก้อน</button>
+    <button data-tab="B">วงจร B<br>2 ก้อน</button>
+    <button data-tab="C">วงจร C<br>3 ก้อน</button>
+  </div>
+
+  <div id="boards"></div>
+</main>
+
+<script>
+(() => {
+  const boardDefs = [
+    {id:'A', target:1},
+    {id:'B', target:2},
+    {id:'C', target:3}
+  ];
+
+  const host = document.getElementById('boards');
+
+  function boardTemplate(def){
+    return `
+    <section class="board ${def.id==='A'?'active':''}" data-board="${def.id}">
+      <h2>วงจร ${def.id}</h2>
+      <div class="sub">ให้นักเรียนต่อเองทั้งหมด • เป้าหมายแบตเตอรี่ ${def.target} ก้อน</div>
+      <div class="tools">
+        <button data-add="battery">+ แบตเตอรี่</button>
+        <button data-add="bulb">+ หลอดไฟ</button>
+        <button data-add="switch">+ สวิตช์</button>
+      </div>
+      <div class="modes">
+        <button class="red active" data-mode="red">สายแดง</button>
+        <button class="black" data-mode="black">สายดำ</button>
+        <button class="deleteMode" data-delete-wire>ลบสาย</button>
+      </div>
+      <button class="reset">เริ่มวงจรนี้ใหม่</button>
+      <div class="trash">🗑️ ใช้ปุ่ม × บนอุปกรณ์เพื่อลบ (เหมาะกับมือถือที่สุด)</div>
+      <div class="stage">
+        <svg class="wires"></svg>
+        <div class="hint">แตะจุดต่อสาย 2 จุดเพื่อเชื่อม • แตะสวิตช์เพื่อเปิด/ปิด</div>
+      </div>
+      <div class="stats">
+        <div class="pill">แบตเตอรี่ <b class="bc">0</b></div>
+        <div class="pill">หลอดไฟ <b class="lc">0</b></div>
+        <div class="pill">สวิตช์ <b class="sc">0</b></div>
+        <div class="pill">ความสว่าง <b class="bv">0%</b></div>
+      </div>
+      <div class="bar"><div class="fill"></div></div>
+      <div class="status"><b>เริ่มภารกิจ</b><div class="st">เพิ่มอุปกรณ์และต่อสายเองทั้งหมด</div></div>
+    </section>`;
+  }
+
+  host.innerHTML = boardDefs.map(boardTemplate).join('');
+
+  document.querySelectorAll('[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-tab]').forEach(x => x.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.board').forEach(b => b.classList.toggle('active', b.dataset.board === btn.dataset.tab));
+    });
+  });
+
+  class Board {
+    constructor(root){
+      this.root=root;
+      this.stage=root.querySelector('.stage');
+      this.svg=root.querySelector('.wires');
+      this.state={components:[],wires:[],next:1,mode:'red',selected:null,deleteWire:false};
+
+      root.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click',()=>this.add(b.dataset.add)));
+      root.querySelector('[data-mode="red"]').addEventListener('click',()=>this.setMode('red'));
+      root.querySelector('[data-mode="black"]').addEventListener('click',()=>this.setMode('black'));
+      root.querySelector('[data-delete-wire]').addEventListener('click',()=>this.toggleDeleteWire());
+      root.querySelector('.reset').addEventListener('click',()=>this.reset());
+
+      window.addEventListener('resize',()=>this.drawWires());
+      this.render();
+    }
+
+    counts(){
+      return {
+        battery:this.state.components.filter(c=>c.type==='battery').length,
+        bulb:this.state.components.filter(c=>c.type==='bulb').length,
+        switch:this.state.components.filter(c=>c.type==='switch').length
+      };
+    }
+
+    tid(id,side){return id+':'+side}
+
+    add(type){
+      const n=this.counts()[type];
+      if(type==='battery'&&n>=4)return;
+      if(type==='bulb'&&n>=4)return;
+      if(type==='switch'&&n>=4)return;
+
+      const defaults={battery:[22,22],switch:[72,22],bulb:[38,72]};
+      const d=defaults[type];
+      this.state.components.push({
+        id:'c'+this.state.next++,
+        type,
+        x:d[0]+(n%2)*26,
+        y:d[1]+Math.floor(n/2)*20,
+        closed:type==='switch'?false:undefined
+      });
+      this.render();
+    }
+
+    remove(id){
+      const c=this.state.components.find(x=>x.id===id);
+      if(!c)return;
+      const terms=c.type==='battery'?[this.tid(id,'minus'),this.tid(id,'plus')]:[this.tid(id,'left'),this.tid(id,'right')];
+      this.state.wires=this.state.wires.filter(w=>!terms.includes(w.a)&&!terms.includes(w.b));
+      if(this.state.selected&&terms.includes(this.state.selected))this.state.selected=null;
+      this.state.components=this.state.components.filter(x=>x.id!==id);
+      this.render();
+    }
+
+    html(c){
+      if(c.type==='battery')return `
+        <div class="battery">
+          <button class="terminal minus" data-terminal="${this.tid(c.id,'minus')}">−</button>
+          <button class="terminal plus" data-terminal="${this.tid(c.id,'plus')}">+</button>
+        </div>
+        <div><span class="label">แบตเตอรี่</span><button class="removeBtn" data-remove="${c.id}">×</button></div>`;
+      if(c.type==='bulb')return `
+        <div class="bulb">
+          <div class="glass"></div><div class="base"></div>
+          <button class="terminal nodeB" data-terminal="${this.tid(c.id,'left')}"></button>
+          <button class="terminal nodeR" data-terminal="${this.tid(c.id,'right')}"></button>
+        </div>
+        <div><span class="label">หลอดไฟ</span><button class="removeBtn" data-remove="${c.id}">×</button></div>`;
+      return `
+        <div class="switchbox ${c.closed?'closed':''}" data-toggle="${c.id}">
+          <button class="terminal nodeB" data-terminal="${this.tid(c.id,'left')}"></button>
+          <button class="terminal nodeR" data-terminal="${this.tid(c.id,'right')}"></button>
+        </div>
+        <div><span class="label">สวิตช์</span><button class="removeBtn" data-remove="${c.id}">×</button></div>`;
+    }
+
+    makeEl(c){
+      const el=document.createElement('div');
+      el.className='component';
+      el.dataset.id=c.id;
+      el.style.left=c.x+'%';
+      el.style.top=c.y+'%';
+      el.innerHTML=this.html(c);
+
+      let drag=false,sx=0,sy=0,ox=0,oy=0;
+      el.addEventListener('pointerdown',e=>{
+        if(e.target.closest('.terminal')||e.target.closest('.removeBtn')||e.target.closest('.switchbox'))return;
+        drag=true;sx=e.clientX;sy=e.clientY;ox=c.x;oy=c.y;
+        try{el.setPointerCapture(e.pointerId)}catch(err){}
+        e.preventDefault();
+      });
+      el.addEventListener('pointermove',e=>{
+        if(!drag)return;
+        const r=this.stage.getBoundingClientRect();
+        c.x=Math.max(8,Math.min(92,ox+(e.clientX-sx)/r.width*100));
+        c.y=Math.max(12,Math.min(90,oy+(e.clientY-sy)/r.height*100));
+        el.style.left=c.x+'%';el.style.top=c.y+'%';this.drawWires();e.preventDefault();
+      });
+      el.addEventListener('pointerup',()=>drag=false);
+      el.addEventListener('pointercancel',()=>drag=false);
+
+      el.querySelectorAll('[data-terminal]').forEach(t=>{
+        t.addEventListener('click',e=>{
+          e.preventDefault();e.stopPropagation();
+          this.tapTerminal(t.dataset.terminal);
+        });
+      });
+
+      const sw=el.querySelector('[data-toggle]');
+      if(sw){
+        sw.addEventListener('click',e=>{
+          if(e.target.closest('.terminal'))return;
+          e.preventDefault();e.stopPropagation();
+          c.closed=!c.closed;this.render();
+        });
+      }
+
+      el.querySelector('[data-remove]').addEventListener('click',e=>{
+        e.preventDefault();e.stopPropagation();this.remove(c.id);
+      });
+
+      return el;
+    }
+
+    tapTerminal(term){
+      if(this.state.deleteWire)return;
+      if(!this.state.selected){
+        this.state.selected=term;
+        this.refreshTerminalSelection();
+        return;
+      }
+      if(this.state.selected===term){
+        this.state.selected=null;this.refreshTerminalSelection();return;
+      }
+      const exists=this.state.wires.some(w=>(w.a===this.state.selected&&w.b===term)||(w.a===term&&w.b===this.state.selected));
+      if(!exists){
+        this.state.wires.push({id:'w'+this.state.next++,a:this.state.selected,b:term,color:this.state.mode});
+      }
+      this.state.selected=null;
+      this.render();
+    }
+
+    refreshTerminalSelection(){
+      this.root.querySelectorAll('.terminal').forEach(t=>t.classList.toggle('selected',t.dataset.terminal===this.state.selected));
+    }
+
+    setMode(mode){
+      this.state.mode=mode;this.state.deleteWire=false;this.state.selected=null;
+      this.root.querySelector('[data-mode="red"]').classList.toggle('active',mode==='red');
+      this.root.querySelector('[data-mode="black"]').classList.toggle('active',mode==='black');
+      this.root.querySelector('[data-delete-wire]').classList.remove('active');
+      this.refreshTerminalSelection();
+      this.drawWires();
+    }
+
+    toggleDeleteWire(){
+      this.state.deleteWire=!this.state.deleteWire;this.state.selected=null;
+      this.root.querySelector('[data-delete-wire]').classList.toggle('active',this.state.deleteWire);
+      this.root.querySelector('[data-mode="red"]').classList.remove('active');
+      this.root.querySelector('[data-mode="black"]').classList.remove('active');
+      this.drawWires();
+    }
+
+    center(tid){
+      const t=this.root.querySelector(`[data-terminal="${tid}"]`);
+      if(!t)return null;
+      const sr=this.stage.getBoundingClientRect(),r=t.getBoundingClientRect();
+      return{x:r.left-sr.left+r.width/2,y:r.top-sr.top+r.height/2}
+    }
+
+    curve(a,b){
+      const mx=(a.x+b.x)/2;
+      return `M ${a.x} ${a.y} C ${mx} ${a.y}, ${mx} ${b.y}, ${b.x} ${b.y}`;
+    }
+
+    drawWires(){
+      this.svg.innerHTML='';
+      this.state.wires.forEach(w=>{
+        const a=this.center(w.a),b=this.center(w.b);if(!a||!b)return;
+        const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+        p.setAttribute('d',this.curve(a,b));
+        p.setAttribute('class','wire '+(w.color==='red'?'redWire':'blackWire'));
+        if(this.state.deleteWire){
+          p.style.pointerEvents='stroke';p.style.cursor='pointer';
+          p.addEventListener('click',()=>{
+            this.state.wires=this.state.wires.filter(x=>x.id!==w.id);
+            this.render();
+          });
+        }
+        this.svg.appendChild(p);
+      });
+    }
+
+    graph(includeBulb=true){
+      const g={};
+      const edge=(a,b)=>{(g[a]??=[]).push(b);(g[b]??=[]).push(a)};
+      this.state.wires.forEach(w=>edge(w.a,w.b));
+      this.state.components.forEach(c=>{
+        if(c.type==='switch'&&c.closed)edge(this.tid(c.id,'left'),this.tid(c.id,'right'));
+        if(c.type==='bulb'&&includeBulb)edge(this.tid(c.id,'left'),this.tid(c.id,'right'));
+      });
+      return g;
+    }
+
+    reachable(g,start){
+      const seen=new Set([start]),q=[start];
+      while(q.length){
+        const cur=q.shift();
+        for(const n of(g[cur]||[]))if(!seen.has(n)){seen.add(n);q.push(n)}
+      }
+      return seen;
+    }
+
+    complete(){
+      if(!this.state.components.some(c=>c.type==='switch'&&c.closed))return false;
+      const g=this.graph(true);
+      for(const b of this.state.components.filter(c=>c.type==='battery')){
+        if(this.reachable(g,this.tid(b.id,'plus')).has(this.tid(b.id,'minus')))return true;
+      }
+      return false;
+    }
+
+    bulbLit(c){
+      if(!this.state.components.some(x=>x.type==='switch'&&x.closed))return false;
+      const g=this.graph(false);
+      const L=this.tid(c.id,'left'),R=this.tid(c.id,'right');
+      for(const b of this.state.components.filter(x=>x.type==='battery')){
+        const p=this.reachable(g,this.tid(b.id,'plus'));
+        const m=this.reachable(g,this.tid(b.id,'minus'));
+        if((p.has(L)&&m.has(R))||(p.has(R)&&m.has(L)))return true;
+      }
+      return false;
+    }
+
+    brightness(){
+      if(!this.complete())return 0;
+      const n=this.counts().battery;
+      return ({0:0,1:18,2:50,3:85,4:100})[Math.min(n,4)]||0;
+    }
+
+    reset(){
+      this.state.components=[];this.state.wires=[];this.state.next=1;this.state.selected=null;this.state.deleteWire=false;this.state.mode='red';
+      this.render();
+    }
+
+    render(){
+      this.stage.querySelectorAll('.component').forEach(n=>n.remove());
+      this.state.components.forEach(c=>this.stage.appendChild(this.makeEl(c)));
+      this.drawWires();
+      this.refreshTerminalSelection();
+
+      const c=this.counts(),br=this.brightness();
+      this.root.querySelector('.bc').textContent=c.battery;
+      this.root.querySelector('.lc').textContent=c.bulb;
+      this.root.querySelector('.sc').textContent=c.switch;
+      this.root.querySelector('.bv').textContent=br+'%';
+      this.root.querySelector('.fill').style.width=br+'%';
+
+      let lit=0;
+      this.state.components.filter(c=>c.type==='bulb').forEach(b=>{
+        const el=this.root.querySelector(`[data-id="${b.id}"]`),g=el?.querySelector('.glass');
+        if(g&&this.bulbLit(b)&&br>0){
+          lit++;g.classList.add('on');
+          g.style.setProperty('--glow',(8+br*.42)+'px');
+          g.style.filter=`brightness(${0.72+br/65}) saturate(${1+br/90})`;
+        }
+      });
+
+      const status=this.root.querySelector('.status'),st=this.root.querySelector('.st');
+      if(br>0&&lit>0){
+        status.classList.add('ok');
+        const level=br>=85?'สว่างมาก':br>=50?'สว่างปานกลาง':'สว่างน้อย';
+        status.querySelector('b').textContent='✅ วงจรทำงานแล้ว';
+        st.textContent=`ระดับความสว่าง: ${level} (${br}%)`;
+      }else{
+        status.classList.remove('ok');
+        status.querySelector('b').textContent='วงจรยังไม่สมบูรณ์';
+        st.textContent='เพิ่มอุปกรณ์ แตะจุดต่อสายให้ครบ แล้วแตะสวิตช์เพื่อปิดวงจร';
+      }
+    }
+  }
+
+  document.querySelectorAll('.board').forEach(b=>new Board(b));
+})();
+</script>
+</body>
+</html>
